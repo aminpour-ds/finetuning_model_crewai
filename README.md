@@ -2,6 +2,17 @@
 
 An intelligent medical consultation system powered by [crewAI](https://crewai.com) and fine-tuned phi-3 models running locally via Ollama. This system simulates a complete clinical workflow with 6 specialized AI agents that conduct patient interviews, process clinical data, generate assessments, and maintain persistent medical records.
 
+############################################################################################
+Adding a finetune model to ollamd:
+
+1. In the cmd Go to the directory that “Modelfile” and “phi-3-mini-4k-instruct.Q4_K_M.gguf” are there.
+
+2. run this command in that directory:
+ollama create subjective_agent -f Modelfile
+
+3. run “ollama list” to see the model
+############################################################################################
+
 ## Features
 
 - **Patient Identification**: Automatically searches database for returning patients or creates new records
