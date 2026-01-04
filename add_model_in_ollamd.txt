@@ -1,0 +1,8 @@
+Adding a finetune model to ollamd:
+
+1. In the cmd Go to the directory that “Modelfile” and “phi-3-mini-4k-instruct.Q4_K_M.gguf” are there.
+
+2. run this command in that directory:
+ollama create subjective_agent -f Modelfile
+
+3. run “ollama list” to see the model

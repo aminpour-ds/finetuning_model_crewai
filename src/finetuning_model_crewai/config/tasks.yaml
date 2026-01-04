@@ -1,0 +1,221 @@
+# ============================================================================
+# 3-TASK WORKFLOW
+# ============================================================================
+# Task 1: Acute Symptoms Interview (Chief Complaint + HPI + ROS)
+# Task 2: Medical History Interview (PMH + Medications + Allergies)
+# Task 3: Clinical Summary (Synthesize all information)
+# ============================================================================
+
+acute_symptoms_interview_task: 
+  description: >
+    TASK 1: SYMPTOM INTERVIEW - Chief Complaint, HPI, Review of Systems
+    
+    Patient ID: {patient_id}
+    Patient Name: {patient_name}
+    Chief Complaint: {patient_complaint}
+    Patient Status: {patient_status} (new or returning)
+    
+    OBJECTIVE:
+    Conduct a natural, conversational interview to understand the patient's current medical concern.
+    
+    YOUR TRAINING: 
+    You were trained on real doctor-patient dialogues showing how physicians: 
+    - Adapt questions to the specific complaint
+    - Build on patient responses
+    - Focus on relevant symptoms
+    - Skip unnecessary questions
+    
+    APPROACH:
+    1. Start by acknowledging the chief complaint:  "{patient_complaint}"
+    
+    2. Use your training to determine which questions are appropriate. 
+       For example: 
+       - Trauma/injury → mechanism, timeline, function
+       - Pain complaints → OPQRST framework (as relevant)
+       - Respiratory → breathing, cough, chest symptoms
+       - Neurological → onset, location, associated symptoms
+    
+    3. Conduct Review of Systems based on:
+       - The chief complaint category
+       - Symptoms the patient has already mentioned
+       - Red flag symptoms you need to rule out
+    
+    4. Ask ONE question at a time and wait for responses
+    
+    5. Follow up naturally based on patient answers
+    
+    CRITICAL RULES:
+    - Do NOT ask irrelevant questions (e.g., don't ask about radiation 
+      pattern for a broken finger)
+    - DO adapt your questioning style to match the complaint
+    - DO use your training data as a guide, not a script
+    - DO document exactly what the patient reports
+    
+    If patient is RETURNING and last visit <15 days ago:
+    - Ask if this is related to their previous visit
+    - Focus on what's changed or new
+    
+  expected_output: >
+    Structured clinical documentation in JSON format:
+    {
+      "chief_complaint": "patient's primary concern",
+      "history_of_present_illness": {
+        "narrative": "conversational summary",
+        "key_elements": {
+          "onset": "when/how it started",
+          "duration": "timeline",
+          "character": "quality/description",
+          "severity": "impact level",
+          "modifying_factors": ["what affects it"],
+          "associated_symptoms": ["related findings"],
+          "context": "relevant circumstances"
+        }
+      },
+      "review_of_systems":  {
+        "systems_reviewed": ["which systems you asked about"],
+        "positive_findings": ["symptoms present"],
+        "pertinent_negatives": ["important symptoms absent"]
+      },
+      "clinical_reasoning": "brief note on why you asked what you asked"
+    }
+  
+  agent: subjective_agent_Acute_Symptoms
+  human_input: true
+
+
+medical_history_interview_task: 
+  description: >
+    TASK 2: MEDICAL HISTORY INTERVIEW
+    
+    Patient ID: {patient_id}
+    Patient Status: {patient_status}
+    
+    {patient_history_context}
+    
+    OBJECTIVE: 
+    Gather relevant past medical history, medications, and allergies.
+    
+    For RETURNING patients:
+    - Review the history shown above
+    - Ask only about CHANGES or NEW information since last visit
+    - Update medications (any changes in dose, new meds, stopped meds)
+    - Confirm allergies haven't changed
+    - Ask about new diagnoses or hospitalizations
+    
+    For NEW patients:
+    - Conduct full medical history interview
+    - Past medical conditions
+    - Current medications (name, dose, frequency)
+    - Allergies and reactions
+    - Surgical history
+    - Family history
+    - Social history (smoking, alcohol, drugs)
+    
+  expected_output: >
+    Structured history in JSON format:
+    {
+      "past_medical_history": ["list", "of", "conditions"],
+      "current_medications": [
+        {"name": "med name", "dose": "dosage", "frequency": "how often", "indication": "what for"}
+      ],
+      "allergies": [
+        {"allergen": "substance", "reaction": "type of reaction"}
+      ],
+      "surgical_history": ["list", "of", "surgeries"],
+      "family_history": {"relevant family conditions"},
+      "social_history": {
+        "smoking": "status",
+        "alcohol": "frequency",
+        "recreational_drugs": "status",
+        "occupation": "job"
+      },
+      "changes_since_last_visit": "for returning patients only"
+    }
+  
+  agent: subjective_agent_history
+  human_input: true
+
+
+clinical_summary_task: 
+  description: >
+    TASK 3: CLINICAL SUMMARY SYNTHESIS
+    
+    Patient ID:  {patient_id}
+    Patient Name: {patient_name}
+    Chief Complaint: {patient_complaint}
+    
+    OBJECTIVE: 
+    Create a clear, professional clinical summary integrating information
+    from both interviews, using the format learned in your training.
+    
+    YOUR TRAINING:
+    You learned how medical documentation: 
+    - Prioritizes relevant information
+    - Uses clear, concise language
+    - Follows logical clinical flow
+    - Highlights critical findings
+    
+    SYNTHESIS APPROACH:
+    1. Review the outputs from Tasks 1 and 2
+    
+    2. Identify connections: 
+       - How does past history relate to current complaint?
+       - Are there medication-related concerns?
+       - What are the clinical implications?
+    
+    3. Organize into standard format:
+       - Chief Complaint (1 sentence)
+       - HPI (narrative paragraph)
+       - ROS (relevant findings only)
+       - PMH (emphasize relevant conditions)
+       - Medications (current list)
+       - Allergies (clearly stated)
+    
+    4. Add clinical context where appropriate
+    
+    CRITICAL RULES:
+    - Do NOT add information not gathered in interviews
+    - DO use exact patient wording when quoting symptoms
+    - DO organize logically for physician review
+    - DO flag any concerning patterns or interactions
+    
+  expected_output: >
+    Professional clinical summary: 
+    {
+      "visit_info": {
+        "date": "timestamp",
+        "patient_id":  "{patient_id}",
+        "patient_name": "{patient_name}",
+        "visit_type": "new/follow-up"
+      },
+      
+      "chief_complaint": "concise statement",
+      
+      "history_of_present_illness":  
+        "Narrative paragraph integrating temporal sequence, symptom 
+        characteristics, and context in natural prose",
+      
+      "review_of_systems": 
+        "Constitutional: [findings]
+         Cardiovascular: [findings]
+         [Other relevant systems]
+         
+         All other systems reviewed and negative.",
+      
+      "past_medical_history": "List with relevance noted",
+      
+      "medications":  "Current regimen with doses",
+      
+      "allergies": "Clear statement of allergies or NKDA",
+      
+      "clinical_impression": 
+        "Brief note on how history informs likely diagnosis/management",
+      
+      "documentation_notes": 
+        "Any clarifications or limitations in the information gathered"
+    }
+  
+  agent: clinical_summary_agent
+  context:
+    - acute_symptoms_interview_task
+    - medical_history_interview_task
